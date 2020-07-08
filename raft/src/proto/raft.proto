@@ -6,8 +6,8 @@ package raftpb;
 message RequestVoteArgs {
     uint64 term = 1;
     uint64 candidate_id = 2;
-    // uint64 last_log_index = 3;
-    // uint64 last_log_term = 4;
+    uint64 last_log_index = 3;
+    uint64 last_log_term = 4;
 }
 
 // RequestVote RPC reply structure.
@@ -21,10 +21,10 @@ message RequestVoteReply {
 message AppendEntriesArgs {
     uint64 term = 1;
     uint64 leader_id = 2;
-    // uint64 prev_log_index = 3;
-    // uint64 prev_log_term = 4;
-    // uint64 leader_commit = 5;
-    // repeated Log entries = 6;
+    uint64 prev_log_index = 3;
+    uint64 prev_log_term = 4;
+    uint64 leader_commit = 5;
+    repeated Log entries = 6;
 }
 
 // AppendEntries RPC reply structure.
@@ -34,8 +34,8 @@ message AppendEntriesReply {
     uint64 from = 3;
 }
 
-// message Log {
-//     uint64 term = 1;   // Leader's term
-//     uint64 index = 2;  // Index of log
-//     bytes command = 3;
-// }
+message Log {
+    uint64 term = 1;   // Leader's term
+    uint64 index = 2;  // Index of log
+    bytes command = 3;
+}
