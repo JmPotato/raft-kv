@@ -187,11 +187,10 @@ impl Config {
         for (i, connected) in self.connected.iter().enumerate() {
             if *connected {
                 let xterm = self.rafts.lock().unwrap()[i].as_ref().unwrap().term();
-                let xme = self.rafts.lock().unwrap()[i].as_ref().unwrap().me();
                 if term == 0 {
                     term = xterm;
                 } else if term != xterm {
-                    panic!("servers disagree on term {} with #{}", xterm, xme);
+                    panic!("servers disagree on term");
                 }
             }
         }

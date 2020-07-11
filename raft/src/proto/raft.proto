@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package raftpb;
 
-// RequestVote RPC arguments structure.
 message RequestVoteArgs {
     uint64 term = 1;
     uint64 candidate_id = 2;
@@ -10,32 +9,29 @@ message RequestVoteArgs {
     uint64 last_log_term = 4;
 }
 
-// RequestVote RPC reply structure.
 message RequestVoteReply {
     uint64 term = 1;
     bool vote_granted = 2;
-    uint64 from = 3;
 }
 
-// AppendEntries RPC arguments structure.
 message AppendEntriesArgs {
     uint64 term = 1;
     uint64 leader_id = 2;
     uint64 prev_log_index = 3;
     uint64 prev_log_term = 4;
     uint64 leader_commit = 5;
-    repeated Log entries = 6;
+    repeated uint64 entries_term = 6;
+    repeated bytes entries = 7;
 }
 
-// AppendEntries RPC reply structure.
 message AppendEntriesReply {
     uint64 term = 1;
     bool success = 2;
-    uint64 from = 3;
 }
 
-message Log {
-    uint64 term = 1;   // Leader's term
-    uint64 index = 2;  // Index of log
-    bytes command = 3;
+service Raft {
+    rpc RequestVote (RequestVoteArgs) returns (RequestVoteReply) {
+    }
+    rpc AppendEntries (AppendEntriesArgs) returns (AppendEntriesReply) {
+    }
 }
