@@ -27,6 +27,8 @@ message AppendEntriesArgs {
 message AppendEntriesReply {
     uint64 term = 1;
     bool success = 2;
+    uint64 x_idx = 3;
+    uint64 x_term = 4;
 }
 
 service Raft {

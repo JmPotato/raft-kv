@@ -1,8 +1,8 @@
 #![allow(clippy::identity_op)]
 
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::mpsc::{channel, Sender};
-use std::sync::{Arc, Mutex};
+// use std::sync::atomic::{AtomicUsize, Ordering};
+// use std::sync::mpsc::{channel, Sender};
+// use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
@@ -11,8 +11,9 @@ use futures::executor::block_on;
 use futures::future;
 use rand::{rngs::ThreadRng, Rng};
 
-use crate::raft::config::{Config, Entry, Storage};
-use crate::raft::Node;
+// use crate::raft::config::{Config, Entry, Storage};
+use crate::raft::config::{Config, Entry};
+// use crate::raft::Node;
 
 /// The tester generously allows solutions to complete elections in one second
 /// (much more than the paper's range of timeouts).
@@ -733,284 +734,284 @@ fn test_figure_8_2c() {
     cfg.end();
 }
 
-#[test]
-fn test_unreliable_agree_2c() {
-    let servers = 5;
+// #[test]
+// fn test_unreliable_agree_2c() {
+//     let servers = 5;
 
-    let cfg = {
-        let mut cfg = Config::new(servers, true);
-        cfg.begin("Test (2C): unreliable agreement");
-        Arc::new(cfg)
-    };
+//     let cfg = {
+//         let mut cfg = Config::new(servers, true);
+//         cfg.begin("Test (2C): unreliable agreement");
+//         Arc::new(cfg)
+//     };
 
-    let mut dones = vec![];
-    for iters in 1..50 {
-        for j in 0..4 {
-            let c = cfg.clone();
-            let (tx, rx) = oneshot::channel();
-            thread::spawn(move || {
-                c.one(
-                    Entry {
-                        x: (100 * iters) + j,
-                    },
-                    1,
-                    true,
-                );
-                tx.send(()).map_err(|e| panic!("send failed: {:?}", e))
-            });
-            dones.push(rx);
-        }
-        cfg.one(Entry { x: iters }, 1, true);
-    }
+//     let mut dones = vec![];
+//     for iters in 1..50 {
+//         for j in 0..4 {
+//             let c = cfg.clone();
+//             let (tx, rx) = oneshot::channel();
+//             thread::spawn(move || {
+//                 c.one(
+//                     Entry {
+//                         x: (100 * iters) + j,
+//                     },
+//                     1,
+//                     true,
+//                 );
+//                 tx.send(()).map_err(|e| panic!("send failed: {:?}", e))
+//             });
+//             dones.push(rx);
+//         }
+//         cfg.one(Entry { x: iters }, 1, true);
+//     }
 
-    cfg.net.set_reliable(true);
+//     cfg.net.set_reliable(true);
 
-    block_on(async {
-        future::join_all(dones)
-            .await
-            .into_iter()
-            .for_each(|done| done.unwrap());
-    });
+//     block_on(async {
+//         future::join_all(dones)
+//             .await
+//             .into_iter()
+//             .for_each(|done| done.unwrap());
+//     });
 
-    cfg.one(Entry { x: 100 }, servers, true);
+//     cfg.one(Entry { x: 100 }, servers, true);
 
-    cfg.end();
-}
+//     cfg.end();
+// }
 
-#[test]
-fn test_figure_8_unreliable_2c() {
-    let servers = 5;
-    let mut cfg = Config::new(servers, true);
+// #[test]
+// fn test_figure_8_unreliable_2c() {
+//     let servers = 5;
+//     let mut cfg = Config::new(servers, true);
 
-    cfg.begin("Test (2C): Figure 8 (unreliable)");
-    let mut random = rand::thread_rng();
-    cfg.one(
-        Entry {
-            x: random.gen::<u64>() % 10000,
-        },
-        1,
-        true,
-    );
+//     cfg.begin("Test (2C): Figure 8 (unreliable)");
+//     let mut random = rand::thread_rng();
+//     cfg.one(
+//         Entry {
+//             x: random.gen::<u64>() % 10000,
+//         },
+//         1,
+//         true,
+//     );
 
-    let mut nup = servers;
-    for iters in 0..1000 {
-        if iters == 200 {
-            cfg.net.set_long_reordering(true);
-        }
-        let mut leader = None;
-        for i in 0..servers {
-            if cfg.rafts.lock().unwrap()[i]
-                .as_ref()
-                .unwrap()
-                .start(&Entry {
-                    x: random.gen::<u64>() % 10000,
-                })
-                .is_ok()
-                && cfg.connected[i]
-            {
-                leader = Some(i);
-            }
-        }
+//     let mut nup = servers;
+//     for iters in 0..1000 {
+//         if iters == 200 {
+//             cfg.net.set_long_reordering(true);
+//         }
+//         let mut leader = None;
+//         for i in 0..servers {
+//             if cfg.rafts.lock().unwrap()[i]
+//                 .as_ref()
+//                 .unwrap()
+//                 .start(&Entry {
+//                     x: random.gen::<u64>() % 10000,
+//                 })
+//                 .is_ok()
+//                 && cfg.connected[i]
+//             {
+//                 leader = Some(i);
+//             }
+//         }
 
-        if (random.gen::<usize>() % 1000) < 100 {
-            let ms = random.gen::<u64>() % (RAFT_ELECTION_TIMEOUT.as_millis() as u64 / 2);
-            thread::sleep(Duration::from_millis(ms as u64));
-        } else {
-            let ms = random.gen::<u64>() % 13;
-            thread::sleep(Duration::from_millis(ms));
-        }
+//         if (random.gen::<usize>() % 1000) < 100 {
+//             let ms = random.gen::<u64>() % (RAFT_ELECTION_TIMEOUT.as_millis() as u64 / 2);
+//             thread::sleep(Duration::from_millis(ms as u64));
+//         } else {
+//             let ms = random.gen::<u64>() % 13;
+//             thread::sleep(Duration::from_millis(ms));
+//         }
 
-        if let Some(leader) = leader {
-            if (random.gen::<usize>() % 1000) < (RAFT_ELECTION_TIMEOUT.as_millis() as usize) / 2 {
-                cfg.disconnect(leader);
-                nup -= 1;
-            }
-        }
+//         if let Some(leader) = leader {
+//             if (random.gen::<usize>() % 1000) < (RAFT_ELECTION_TIMEOUT.as_millis() as usize) / 2 {
+//                 cfg.disconnect(leader);
+//                 nup -= 1;
+//             }
+//         }
 
-        if nup < 3 {
-            let s = random.gen::<usize>() % servers;
-            if !cfg.connected[s] {
-                cfg.connect(s);
-                nup += 1;
-            }
-        }
-    }
+//         if nup < 3 {
+//             let s = random.gen::<usize>() % servers;
+//             if !cfg.connected[s] {
+//                 cfg.connect(s);
+//                 nup += 1;
+//             }
+//         }
+//     }
 
-    for i in 0..servers {
-        if !cfg.connected[i] {
-            cfg.connect(i);
-        }
-    }
+//     for i in 0..servers {
+//         if !cfg.connected[i] {
+//             cfg.connect(i);
+//         }
+//     }
 
-    cfg.one(
-        Entry {
-            x: random.gen::<u64>() % 10000,
-        },
-        servers,
-        true,
-    );
+//     cfg.one(
+//         Entry {
+//             x: random.gen::<u64>() % 10000,
+//         },
+//         servers,
+//         true,
+//     );
 
-    cfg.end();
-}
+//     cfg.end();
+// }
 
-fn internal_churn(unreliable: bool) {
-    let servers = 5;
-    let mut cfg = Config::new(servers, unreliable);
-    if unreliable {
-        cfg.begin("Test (2C): unreliable churn")
-    } else {
-        cfg.begin("Test (2C): churn")
-    }
+// fn internal_churn(unreliable: bool) {
+//     let servers = 5;
+//     let mut cfg = Config::new(servers, unreliable);
+//     if unreliable {
+//         cfg.begin("Test (2C): unreliable churn")
+//     } else {
+//         cfg.begin("Test (2C): churn")
+//     }
 
-    let stop = Arc::new(AtomicUsize::new(0));
+//     let stop = Arc::new(AtomicUsize::new(0));
 
-    // create concurrent clients
-    // TODO: change it a future
-    fn cfn(
-        me: usize,
-        stop_clone: Arc<AtomicUsize>,
-        tx: Sender<Option<Vec<u64>>>,
-        rafts: Arc<Mutex<Box<[Option<Node>]>>>,
-        storage: Arc<Mutex<Storage>>,
-    ) {
-        let mut values = vec![];
-        while stop_clone.load(Ordering::SeqCst) == 0 {
-            let mut random = rand::thread_rng();
-            let x = random.gen::<u64>();
-            let mut index: i64 = -1;
-            let mut ok = false;
-            // try them all, maybe one of them is a leader
-            let rafts: Vec<_> = rafts.lock().unwrap().iter().cloned().collect();
-            for raft in &rafts {
-                match raft {
-                    Some(rf) => {
-                        match rf.start(&Entry { x }) {
-                            Ok((index1, _)) => {
-                                index = index1 as i64;
-                                ok = true;
-                            }
-                            Err(_) => continue,
-                        };
-                    }
-                    None => continue,
-                }
-            }
-            if ok {
-                // maybe leader will commit our value, maybe not.
-                // but don't wait forever.
-                for to in &[10, 20, 50, 100, 200] {
-                    let (nd, cmd) = storage.lock().unwrap().n_committed(index as u64);
-                    if nd > 0 {
-                        match cmd {
-                            Some(xx) => {
-                                if xx.x == x {
-                                    values.push(xx.x);
-                                }
-                            }
-                            None => panic!("wrong command type"),
-                        }
-                        break;
-                    }
-                    thread::sleep(Duration::from_millis(*to));
-                }
-            } else {
-                thread::sleep(Duration::from_millis((79 + me * 17) as u64));
-            }
-        }
-        if !values.is_empty() {
-            tx.send(Some(values)).unwrap();
-        } else {
-            tx.send(None).unwrap();
-        }
-    };
+//     // create concurrent clients
+//     // TODO: change it a future
+//     fn cfn(
+//         me: usize,
+//         stop_clone: Arc<AtomicUsize>,
+//         tx: Sender<Option<Vec<u64>>>,
+//         rafts: Arc<Mutex<Box<[Option<Node>]>>>,
+//         storage: Arc<Mutex<Storage>>,
+//     ) {
+//         let mut values = vec![];
+//         while stop_clone.load(Ordering::SeqCst) == 0 {
+//             let mut random = rand::thread_rng();
+//             let x = random.gen::<u64>();
+//             let mut index: i64 = -1;
+//             let mut ok = false;
+//             // try them all, maybe one of them is a leader
+//             let rafts: Vec<_> = rafts.lock().unwrap().iter().cloned().collect();
+//             for raft in &rafts {
+//                 match raft {
+//                     Some(rf) => {
+//                         match rf.start(&Entry { x }) {
+//                             Ok((index1, _)) => {
+//                                 index = index1 as i64;
+//                                 ok = true;
+//                             }
+//                             Err(_) => continue,
+//                         };
+//                     }
+//                     None => continue,
+//                 }
+//             }
+//             if ok {
+//                 // maybe leader will commit our value, maybe not.
+//                 // but don't wait forever.
+//                 for to in &[10, 20, 50, 100, 200] {
+//                     let (nd, cmd) = storage.lock().unwrap().n_committed(index as u64);
+//                     if nd > 0 {
+//                         match cmd {
+//                             Some(xx) => {
+//                                 if xx.x == x {
+//                                     values.push(xx.x);
+//                                 }
+//                             }
+//                             None => panic!("wrong command type"),
+//                         }
+//                         break;
+//                     }
+//                     thread::sleep(Duration::from_millis(*to));
+//                 }
+//             } else {
+//                 thread::sleep(Duration::from_millis((79 + me * 17) as u64));
+//             }
+//         }
+//         if !values.is_empty() {
+//             tx.send(Some(values)).unwrap();
+//         } else {
+//             tx.send(None).unwrap();
+//         }
+//     };
 
-    let ncli = 3;
-    let mut nrec = vec![];
-    for i in 0..ncli {
-        let stop_clone = stop.clone();
-        let (tx, rx) = channel();
-        let storage = cfg.storage.clone();
-        let rafts = cfg.rafts.clone();
-        thread::spawn(move || {
-            cfn(i, stop_clone, tx, rafts, storage);
-        });
-        nrec.push(rx);
-    }
-    let mut random = rand::thread_rng();
-    for _iters in 0..20 {
-        if (random.gen::<usize>() % 1000) < 200 {
-            let i = random.gen::<usize>() % servers;
-            cfg.disconnect(i);
-        }
+//     let ncli = 3;
+//     let mut nrec = vec![];
+//     for i in 0..ncli {
+//         let stop_clone = stop.clone();
+//         let (tx, rx) = channel();
+//         let storage = cfg.storage.clone();
+//         let rafts = cfg.rafts.clone();
+//         thread::spawn(move || {
+//             cfn(i, stop_clone, tx, rafts, storage);
+//         });
+//         nrec.push(rx);
+//     }
+//     let mut random = rand::thread_rng();
+//     for _iters in 0..20 {
+//         if (random.gen::<usize>() % 1000) < 200 {
+//             let i = random.gen::<usize>() % servers;
+//             cfg.disconnect(i);
+//         }
 
-        if (random.gen::<usize>() % 1000) < 500 {
-            let i = random.gen::<usize>() % servers;
-            if cfg.rafts.lock().unwrap().get(i).unwrap().is_none() {
-                cfg.start1(i);
-            }
-            cfg.connect(i);
-        }
+//         if (random.gen::<usize>() % 1000) < 500 {
+//             let i = random.gen::<usize>() % servers;
+//             if cfg.rafts.lock().unwrap().get(i).unwrap().is_none() {
+//                 cfg.start1(i);
+//             }
+//             cfg.connect(i);
+//         }
 
-        if (random.gen::<usize>() % 1000) < 200 {
-            let i = random.gen::<usize>() % servers;
-            if cfg.rafts.lock().unwrap().get(i).unwrap().is_some() {
-                cfg.crash1(i);
-            }
-        }
+//         if (random.gen::<usize>() % 1000) < 200 {
+//             let i = random.gen::<usize>() % servers;
+//             if cfg.rafts.lock().unwrap().get(i).unwrap().is_some() {
+//                 cfg.crash1(i);
+//             }
+//         }
 
-        // Make crash/restart infrequent enough that the peers can often
-        // keep up, but not so infrequent that everything has settled
-        // down from one change to the next. Pick a value smaller than
-        // the election timeout, but not hugely smaller.
-        thread::sleep((RAFT_ELECTION_TIMEOUT * 7) / 10)
-    }
+//         // Make crash/restart infrequent enough that the peers can often
+//         // keep up, but not so infrequent that everything has settled
+//         // down from one change to the next. Pick a value smaller than
+//         // the election timeout, but not hugely smaller.
+//         thread::sleep((RAFT_ELECTION_TIMEOUT * 7) / 10)
+//     }
 
-    thread::sleep(RAFT_ELECTION_TIMEOUT);
-    cfg.net.set_reliable(true);
-    for i in 0..servers {
-        if cfg.rafts.lock().unwrap().get(i).unwrap().is_none() {
-            cfg.start1(i);
-        }
-        cfg.connect(i);
-    }
+//     thread::sleep(RAFT_ELECTION_TIMEOUT);
+//     cfg.net.set_reliable(true);
+//     for i in 0..servers {
+//         if cfg.rafts.lock().unwrap().get(i).unwrap().is_none() {
+//             cfg.start1(i);
+//         }
+//         cfg.connect(i);
+//     }
 
-    stop.store(1, Ordering::SeqCst);
+//     stop.store(1, Ordering::SeqCst);
 
-    let mut values = vec![];
-    for rx in &nrec {
-        let mut vv = rx.recv().unwrap().unwrap();
-        values.append(&mut vv);
-    }
+//     let mut values = vec![];
+//     for rx in &nrec {
+//         let mut vv = rx.recv().unwrap().unwrap();
+//         values.append(&mut vv);
+//     }
 
-    thread::sleep(RAFT_ELECTION_TIMEOUT);
+//     thread::sleep(RAFT_ELECTION_TIMEOUT);
 
-    let last_index = cfg.one(random_entry(&mut random), servers, true);
+//     let last_index = cfg.one(random_entry(&mut random), servers, true);
 
-    let mut really = vec![];
-    for index in 1..=last_index {
-        let v = cfg.wait(index, servers, None).unwrap();
-        really.push(v.x);
-    }
+//     let mut really = vec![];
+//     for index in 1..=last_index {
+//         let v = cfg.wait(index, servers, None).unwrap();
+//         really.push(v.x);
+//     }
 
-    for v1 in &values {
-        let mut ok = false;
-        for v2 in &really {
-            if v1 == v2 {
-                ok = true;
-            }
-        }
-        assert!(ok, "didn't find a value");
-    }
+//     for v1 in &values {
+//         let mut ok = false;
+//         for v2 in &really {
+//             if v1 == v2 {
+//                 ok = true;
+//             }
+//         }
+//         assert!(ok, "didn't find a value");
+//     }
 
-    cfg.end()
-}
+//     cfg.end()
+// }
 
-#[test]
-fn test_reliable_churn_2c() {
-    internal_churn(false);
-}
+// #[test]
+// fn test_reliable_churn_2c() {
+//     internal_churn(false);
+// }
 
-#[test]
-fn test_unreliable_churn_2c() {
-    internal_churn(true);
-}
+// #[test]
+// fn test_unreliable_churn_2c() {
+//     internal_churn(true);
+// }
